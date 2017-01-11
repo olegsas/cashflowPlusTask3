@@ -164,6 +164,36 @@ function runCashFlow(begin, end){// we want to use day from the begining Day 197
 
 db.cashflow.remove({});
 
+function exchange(nowTimeDay, ratesH, amount, fromCurrency, toCurrency){
+    // nowTimeDay in days from zero point
+    //fromCurrency = "Byr", "Byn", "Usd"
+    //toCurrency = "Byr", "Byn", "Usd"
+    var rate = ratesH.rateInDays[nowTimeDay]; // rate for the nowTimeDay
+    var fromByr = 0; var fromByn = 0; var fromUsd = 0; // we sell it to a bank
+    var toByr = 0; var toByn = 0; var toUsd = 0; // we buy it from a bank
+    var exchangeResultA = []; // object for return the result of exchange operation
+    // exchangeResultA[0] = fromByr; exchangeResultA[1] = fromByn; exchangeResultA[2] = fromUsd;
+    // exchangeResultA[3] = toByr; exchangeResultA[4] = toByn; exchangeResultA[5] = toUsd;
+    if((fromCurrency === "Byr") || (fromCurrency === "Byn")){
+        if(fromCurrency === "Byr"){
+            fromByr = amount; toUsd = amount/rate;
+        } else{
+            fromByn = amount; toUsd = amount/rate;
+        }
+    }
+    if((toCurrency === "Byr") || (toCurrency === "Byn")){
+        if(toCurrency === "Byr"){
+            fromUsd = amount; toByr = amount*rate;
+        } else{
+            fromUsd = amount; toByn = amount*rate;
+        }
+    }
+    exchangeResultA[0] = fromByr; exchangeResultA[1] = fromByn; exchangeResultA[2] = fromUsd;
+    exchangeResultA[3] = toByr; exchangeResultA[4] = toByn; exchangeResultA[5] = toUsd;
+
+    return exchangeResultA;
+}
+
 function runCashFlowPLus(begin, end){// we want to use day from the begining Day 1970
 
 }
