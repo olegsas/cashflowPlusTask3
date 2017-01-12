@@ -84,10 +84,16 @@ function readCashFlow(nowTimeDay){
     var cashData  = new Date();
     var cursor;
     var element;
+    var dayCashboxA = []; // we store here the money amounts of the day and return it
         cashData.setTime(nowTimeDay*1000*60*60*24);
         cursor = db.cashflow.find({"Date": cashData}).toArray();
         element = cursor[0];
-        print("byr in cashflow = " + element['Byr']);
+        // element['Byr'] is Byr value, so on element["Byn] and element['Usd']
+        dayCashboxA[0] = element['Byr'];
+        dayCashboxA[1] = element['Byn'];
+        dayCashboxA[2] = element['Usd'];
+        
+        return dayCashboxA;
 }
 
 
@@ -131,10 +137,12 @@ function exchange(nowTimeDay, ratesH, amount, fromCurrency, toCurrency){
 
 function ifWeNeedExchange(cycleTimeDay, Byr, Byn, Usd){
     if ((Byr < 0) && (Usd > 0)){
+        print("##day is = " + cycleTimeDay);
         print("Usd is = " + Usd);
         exchange(cycleTimeDay, ratesH, Usd, "Usd", "Byr");
     }
     if((Byr > 0) && (Usd < 0)){
+        print("##day is = " + cycleTimeDay);
         print("Byr is = " + Byr);
         exchange(cycleTimeDay, ratesH, Byr, "Byr", "Usd");
     }
@@ -152,16 +160,20 @@ function runCashFlowPLus(begin, end){// we want to use day from the begining Day
     // number of the days is finishTimeDay-startTimeDay+1 = 2521
     var flowcashboxA = []; // flowcashboxA is the global cashbox, it is the cashflow
     flowcashboxA[0] = 0; flowcashboxA[1] = 0; flowcashboxA[2] = 0;
-    // let cashboxA[0] = Byr, cashboxA[1] = Byn, cashboxA[2] = USD
+    // let cashboxA[0] = Byr, cashboxA[1] = Byn, cashboxA[2] = Usd
     var cashboxA = []; // we store the result of calculateCashDelta in it
+
+    var dayCashboxA = []; // we store here the result of the readCashFlow
 
     for(var cycleTimeDay = startTimeDay; cycleTimeDay <= finishTimeDay; cycleTimeDay++){
         
-        readCashFlow(cycleTimeDay);
+        dayCashboxA = readCashFlow(cycleTimeDay);
+        // dayCashboxA[0] = Byr; dayCashboxA[1] = Byn; dayCashboxA[2] = Usd;
+        ifWeNeedExchange(cycleTimeDay, dayCashboxA[0], dayCashboxA[1], dayCashboxA[2]); // I have no idea to use it
 
         // flowcashboxA has an actual amount of money on the cycleTimeDay
         // writeCashFlow(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]);
-        // ifWeNeedExchange(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]); // I have no idea to use it
+        
     }
 }
 
