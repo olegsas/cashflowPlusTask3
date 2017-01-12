@@ -135,16 +135,37 @@ function exchange(nowTimeDay, ratesH, amount, fromCurrency, toCurrency){
     return exchangeResultA;
 }
 
-function ifWeNeedExchange(cycleTimeDay, Byr, Byn, Usd){
+function updateCashFlow(cycleTimeDay, finishTimeDay, exchangeResultA){
+    var Byr, Byn, Usd; // values we want to update
+    var dayCashboxA = []; // we store the result of readCashFlow
+    var dayCashUpdateA = []; // we calculate what to store in the updated cashflow lines
+    Byr = exchangeResultA[3] - exchangeResultA[0]; // toByr - fromByr
+    Byn = exchangeResultA[4] - exchangeResultA[1]; // toByn - fromByn
+    Usd = exchangeResultA[5] - exchangeResultA[2]; // toUsd - fromUsd
+    for(var i = cycleTimeDay; i <= finishTimeDay; i++){
+        dayCashboxA = readCashFlow(i);
+        dayCashUpdateA[0] = dayCashboxA[0] + Byr;
+        dayCashUpdateA[1] = dayCashboxA[1] + Byn;
+        dayCashUpdateA[2] = dayCashboxA[2] + Usd;
+        writeCashFlow(i, dayCashUpdateA[0], dayCashUpdateA[1], dayCashUpdateA[2]);
+    }
+}
+
+function ifWeNeedExchange(cycleTimeDay, finishTimeDay, Byr, Byn, Usd){
+    var exchangeResultA = []; // we store the result of the exchange function
     if ((Byr < 0) && (Usd > 0)){
         print("##day is = " + cycleTimeDay);
         print("Usd is = " + Usd);
-        exchange(cycleTimeDay, ratesH, Usd, "Usd", "Byr");
+        exchangeResultA = exchange(cycleTimeDay, ratesH, Usd, "Usd", "Byr");
+        updateCashFlow(cycleTimeDay, finishTimeDay, exchangeResultA);
+        // we update cashflow from the cycleTimeDay to the finishTimeDay
     }
     if((Byr > 0) && (Usd < 0)){
         print("##day is = " + cycleTimeDay);
         print("Byr is = " + Byr);
-        exchange(cycleTimeDay, ratesH, Byr, "Byr", "Usd");
+        exchangeResultA = exchange(cycleTimeDay, ratesH, Byr, "Byr", "Usd");
+        updateCashFlow(cycleTimeDay, finishTimeDay, exchangeResultA);
+        // we update cashflow from the cycleTimeDay to the finishTimeDay
     }
 }
 
@@ -169,7 +190,7 @@ function runCashFlowPLus(begin, end){// we want to use day from the begining Day
         
         dayCashboxA = readCashFlow(cycleTimeDay);
         // dayCashboxA[0] = Byr; dayCashboxA[1] = Byn; dayCashboxA[2] = Usd;
-        ifWeNeedExchange(cycleTimeDay, dayCashboxA[0], dayCashboxA[1], dayCashboxA[2]); // I have no idea to use it
+        ifWeNeedExchange(cycleTimeDay, finishTimeDay, dayCashboxA[0], dayCashboxA[1], dayCashboxA[2]); // I have no idea to use it
 
         // flowcashboxA has an actual amount of money on the cycleTimeDay
         // writeCashFlow(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]);
