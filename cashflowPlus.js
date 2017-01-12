@@ -80,29 +80,14 @@ function writeCashFlow(nowTimeDay, Byr, Byn, Usd){// we write the cashflow for t
         db.cashflow.insert({"Date": cashData, "Byr": Byr, "Byn": Byn, "Usd": Usd});
 }
 
-function runCashFlow(begin, end){// we want to use day from the begining Day 1970
-    //ratesH.data is in a string format
-    var startDATE = standartDate(begin);
-    var startTimeDay = Math.floor(startDATE.getTime()/(1000*60*60*24));
-    var finishDATE = standartDate(end);
-    var finishTimeDay = Math.floor(finishDATE.getTime()/(1000*60*60*24));
-    //startTimeDay = 14610
-    //finishTimeDay = 17130
-    // number of the days is finishTimeDay-startTimeDay+1 = 2521
-    var flowcashboxA = []; // flowcashboxA is the global cashbox, it is the cashflow
-    flowcashboxA[0] = 0; flowcashboxA[1] = 0; flowcashboxA[2] = 0;
-    // let cashboxA[0] = Byr, cashboxA[1] = Byn, cashboxA[2] = USD
-    var cashboxA = []; // we store the result of calculateCashDelta in it
-
-    for(var cycleTimeDay = startTimeDay; cycleTimeDay <= finishTimeDay; cycleTimeDay++){
-        var cycleData = new Date();
-        cycleData.setTime(cycleTimeDay*1000*60*60*24);
-        cashboxA = calculateCashDelta(cycleTimeDay);
-        for(var i = 0; i<flowcashboxA.length; i++){// we increment flowcashboxA with values of cashboxA
-            flowcashboxA[i] = flowcashboxA[i] + cashboxA[i];
-        }// flowcashboxA has an actual amount of money on the cycleTimeDay
-        writeCashFlow(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]);   
-    }
+function readCashFlow(nowTimeDay){
+    var cashData  = new Date();
+    var cursor;
+    var element;
+        cashData.setTime(nowTimeDay*1000*60*60*24);
+        cursor = db.cashflow.find({"Date": cashData}).toArray();
+        element = cursor[0];
+        print("byr in cashflow = " + element['Byr']);
 }
 
 
@@ -171,14 +156,12 @@ function runCashFlowPLus(begin, end){// we want to use day from the begining Day
     var cashboxA = []; // we store the result of calculateCashDelta in it
 
     for(var cycleTimeDay = startTimeDay; cycleTimeDay <= finishTimeDay; cycleTimeDay++){
-        var cycleData = new Date();
-        cycleData.setTime(cycleTimeDay*1000*60*60*24);
-        cashboxA = calculateCashDelta(cycleTimeDay);
-        for(var i = 0; i<flowcashboxA.length; i++){// we increment flowcashboxA with values of cashboxA
-            flowcashboxA[i] = flowcashboxA[i] + cashboxA[i];
-        }// flowcashboxA has an actual amount of money on the cycleTimeDay
-        writeCashFlow(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]);
-        ifWeNeedExchange(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]); // I have no idea to use it
+        
+        readCashFlow(cycleTimeDay);
+
+        // flowcashboxA has an actual amount of money on the cycleTimeDay
+        // writeCashFlow(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]);
+        // ifWeNeedExchange(cycleTimeDay, flowcashboxA[0], flowcashboxA[1], flowcashboxA[2]); // I have no idea to use it
     }
 }
 
