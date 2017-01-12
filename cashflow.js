@@ -135,7 +135,8 @@ function runCashFlow(begin, end){// we want to use day from the begining Day 197
     var startDATE = standartDate(begin);
     var startTimeDay = Math.floor(startDATE.getTime()/(1000*60*60*24));
     var finishDATE = standartDate(end);
-    var finishTimeDay = Math.floor(finishDATE.getTime()/(1000*60*60*24));
+    var finishTimeDay = 14659;// For the debug only - we use only 50 lines for the table ////////////////////////////
+    // var finishTimeDay = Math.floor(finishDATE.getTime()/(1000*60*60*24));////////////////////////////////////////
     //startTimeDay = 14610
     //finishTimeDay = 17130
     // number of the days is finishTimeDay-startTimeDay+1 = 2521
