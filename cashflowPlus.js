@@ -73,63 +73,6 @@ function findFinishData(ratesH){
     return dataA[num];
 }
 
-function calculateCashDelta(nowTimeDay){
-    // cashbox is a result of the daily transactions
-    // let cashboxA = [];
-    // let cashboxA[0] = Byr, cashboxA[1] = Byn, cashboxA[2] = USD
-    var nowData = new Date();
-    nowData.setTime(nowTimeDay*1000*60*60*24);
-    var cashboxA = [];//0 - Byr, 1 - Byn, 2 - USD
-    cashboxA[0] = 0; cashboxA[1] = 0; cashboxA[2] = 0;
-    var i = 0,
-    TypeA = [],
-    OperationNameA = [],
-    AmountA = [],
-    CurrencyA = [],
-    cursor = db.transactions.find({"Date": nowData}),
-    length;
-        cursor.forEach(
-            function(obj){
-                TypeA[i] = obj.Type;// we find certain field of the certain transaction
-                OperationNameA[i] = obj.OperationName;
-                AmountA[i] = obj.Amount;
-                CurrencyA[i] = obj.Currency;
-                i++;
-            }
-        );
-        length = TypeA.length;
-        if(length>0){
-            for(var j = 0; j<length; j++){
-                switch(CurrencyA[j]){
-                    case "Byr":
-                        if(TypeA[j] === "Exp"){
-                            cashboxA[0] = cashboxA[0] - AmountA[j];
-                        }
-                        else{
-                            cashboxA[0] = cashboxA[0] + AmountA[j];
-                        };
-                        break;
-                    case "Byn":
-                        if(TypeA[j] === "Exp"){
-                            cashboxA[1] = cashboxA[1] - AmountA[j];
-                        }
-                        else{
-                            cashboxA[1] = cashboxA[1] + AmountA[j];
-                        };
-                        break;
-                    case "Usd":
-                       if(TypeA[j] === "Exp"){
-                            cashboxA[2] = cashboxA[2] - AmountA[j];
-                        }
-                        else{
-                            cashboxA[2] = cashboxA[2] + AmountA[j];
-                        }; 
-                }
-            }
-
-        }
-        return cashboxA;
-}
 
 function writeCashFlow(nowTimeDay, Byr, Byn, Usd){// we write the cashflow for the nowTimeDay
     var cashData  = new Date();
@@ -198,14 +141,17 @@ function exchange(nowTimeDay, ratesH, amount, fromCurrency, toCurrency){
     print("nowTimeDay = " + nowTimeDay);
     print("amount = "+ amount);
     print("rate = " + rate);
-    print(typeof rate);
     return exchangeResultA;
 }
 
 function ifWeNeedExchange(cycleTimeDay, Byr, Byn, Usd){
-    if (Byr < 0){
-        print("Byr is = " + Byr);
+    if ((Byr < 0) && (Usd > 0)){
+        print("Usd is = " + Usd);
         exchange(cycleTimeDay, ratesH, Usd, "Usd", "Byr");
+    }
+    if((Byr > 0) && (Usd < 0)){
+        print("Byr is = " + Byr);
+        exchange(cycleTimeDay, ratesH, Byr, "Byr", "Usd");
     }
 }
 
@@ -238,6 +184,6 @@ function runCashFlowPLus(begin, end){// we want to use day from the begining Day
 
 //runCashFlow(findStartData(ratesH), findFinishData(ratesH));//start CashFlow
 
-db.cashflow.remove({});
+//db.cashflow.remove({});
 
 runCashFlowPLus(findStartData(ratesH), findFinishData(ratesH)); //start CashFlowPlus
